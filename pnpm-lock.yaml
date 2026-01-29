@@ -8,8 +8,11 @@ importers:
 
   .:
     dependencies:
+      '@ebay/skin':
+        specifier: ^19.21.0
+        version: 19.21.0
       marko:
-        specifier: ^6.0.0
+        specifier: ^6.0.138
         version: 6.0.138
     devDependencies:
       '@marko/run':
@@ -150,6 +153,9 @@ packages:
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==, tarball: https://artifactory.corp.ebay.com/artifactory/api/npm/npm-corp/@colors/colors/-/colors-1.5.0.tgz}
     engines: {node: '>=0.1.90'}
+
+  '@ebay/skin@19.21.0':
+    resolution: {integrity: sha512-gFPXfGm9q5r8Y8Pe9dx+7fexNbZhN/tvkS+5LymFwCefgxDIBqgNXGNUUZ38sosrkdVQAdK3/FcBz/N9JPohtw==, tarball: https://artifactory.corp.ebay.com/artifactory/api/npm/npm-corp/@ebay/skin/-/skin-19.21.0.tgz}
 
   '@esbuild/aix-ppc64@0.27.2':
     resolution: {integrity: sha512-GZMB+a0mOMZs4MpDbj8RJp4cw+w1WV5NYD6xzgvzUJ5Ek2jerwfO2eADyI6ExDSUED+1X8aMbegahsJi+8mgpw==, tarball: https://artifactory.corp.ebay.com/artifactory/api/npm/npm-corp/@esbuild/aix-ppc64/-/aix-ppc64-0.27.2.tgz}
@@ -1442,6 +1448,8 @@ snapshots:
 
   '@colors/colors@1.5.0':
     optional: true
+
+  '@ebay/skin@19.21.0': {}
 
   '@esbuild/aix-ppc64@0.27.2':
     optional: true

@@ -1,0 +1,157 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-family:
+    "Market Sans",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
+  background: var(--color-background-primary);
+  color: var(--color-foreground-primary);
+  color-scheme: light dark;
+  transition: background var(--motion-duration-medium-3)
+    var(--motion-easing-quick-enter);
+
+  /* &:has([data-theme="kiwi"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-kiwi-200))
+      var(--mq-dk, var(--color-kiwi-800));
+  }
+
+  &:has([data-theme="jade"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-jade-200))
+      var(--mq-dk, var(--color-jade-800));
+  }
+
+  &:has([data-theme="teal"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-teal-200))
+      var(--mq-dk, var(--color-teal-800));
+  }
+
+  &:has([data-theme="blue"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-blue-200))
+      var(--mq-dk, var(--color-blue-800));
+  }
+
+  &:has([data-theme="violet"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-violet-200))
+      var(--mq-dk, var(--color-violet-800));
+  }
+
+  &:has([data-theme="lilac"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-lilac-200))
+      var(--mq-dk, var(--color-lilac-800));
+  }
+
+  &:has([data-theme="pink"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-pink-200))
+      var(--mq-dk, var(--color-pink-800));
+  } */
+
+  /* &:has([data-theme]:is(:hover, :focus-visible)) {
+    transition: background var(--motion-duration-short-3)
+      var(--motion-easing-quick-enter);
+  } */
+
+  /*  */
+
+  &:has([data-theme="yellow"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-yellow-200))
+      var(--mq-dk, var(--color-yellow-900));
+  }
+
+  &:has([data-theme="coral"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-coral-200))
+      var(--mq-dk, var(--color-coral-900));
+  }
+
+  &:has([data-theme="indigo"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-indigo-200))
+      var(--mq-dk, var(--color-indigo-800));
+  }
+
+  &:has([data-theme="red"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-red-200))
+      var(--mq-dk, var(--color-red-800));
+  }
+
+  &:has([data-theme="green"]:is(:hover, :focus-visible)) {
+    background: var(--mq-lt, var(--color-green-200))
+      var(--mq-dk, var(--color-green-800));
+  }
+}
+
+html:has(dialog[open]:modal) {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+}
+
+:is(button, a) {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-stroke-accent);
+    outline-offset: 2px;
+  }
+}
+
+:is(button, a[data-evo]) {
+  user-select: none;
+}
+
+a {
+  color: var(--color-foreground-primary);
+  text-decoration: none;
+}
+
+button {
+  border: none;
+}
+
+h2 {
+  font-size: var(--font-size-giant-3);
+  line-height: 1.1;
+  letter-spacing: -0.0125em;
+  text-wrap: balance;
+
+  @media (min-width: 480px) {
+    font-size: var(--font-size-giant-3);
+  }
+
+  @media (min-width: 768px) {
+    font-size: 4rem;
+  }
+}
+
+p {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+:where(img, video) {
+  width: 100%;
+  height: auto;
+  vertical-align: bottom;
+  border-radius: var(--radius-photo-large);
+}

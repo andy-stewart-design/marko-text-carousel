@@ -1,0 +1,265 @@
+import { slides } from "./data";
+import type { UpdaterFunction } from "./types";
+
+<div class="mode-selector">
+    <button class="mode-btn active" data-mode="wave">
+        Wave
+    </button>
+    <button class="mode-btn" data-mode="blur">
+        Blur
+    </button>
+    <button class="mode-btn" data-mode="scatter">
+        Scatter
+    </button>
+    <button class="mode-btn" data-mode="flip">
+        Flip
+    </button>
+</div>
+
+<div class="carousel-container">
+    <div/scrollDriverRef class="scroll-driver" id="scrollDriver">
+        <div class="scroll-track" id="scrollTrack">
+            <for|_| of=slides>
+                <div class="scroll-item"/>
+            </for>
+        </div>
+    </div>
+
+    <div class="text-display" id="textDisplay">
+        <for|slide, i| of=slides>
+            <div class="text-item" data-index=i>
+                <h2>
+                    <for|char, j| of=slide.title>
+                        <if=char === " ">
+                            ${char}
+                        </if>
+                        <else>
+
+                            <span class="char" data-index=j>
+                                ${char}
+                            </span>
+                        </else>
+                    </for>
+                </h2>
+                <p>${slide.subtitle}</p>
+            </div>
+        </for>
+    </div>
+    <div class="indicators" id="indicators">
+        <for|_| of=slides>
+            <div class="indicator">
+                <div class="indicator-fill"/>
+            </div>
+        </for>
+    </div>
+</div>
+
+<div/debugRef class="debug" id="debug">
+    <div>
+        Scroll:${" "}
+        <span/debugScrollRef>
+            0
+        </span>
+    </div>
+    <div>
+        Progress:${" "}
+        <span/debugProgressRef>
+            0
+        </span>
+    </div>
+    <div>
+        Active:${" "}
+        <span/debugActiveRef>
+            0
+        </span>
+    </div>
+    <div>
+        Local:${" "}
+        <span/debugLocalRef id="debugLocal">
+            0
+        </span>
+    </div>
+</div>
+
+<script>
+    let currentMode = "wave";
+    const scrollDriver = scrollDriverRef();
+    const debug = debugRef();
+
+    // Animation functions for different modes
+    const animations: Record<string, UpdaterFunction> = {
+        wave: (char, charIndex, localProgress, isActive, totalChars) => {
+            const charProgress = charIndex / totalChars;
+            const wave = Math.sin((localProgress * 2 - charProgress) * Math.PI);
+            const yOffset = isActive ? wave * 10 : (1 - localProgress) * 50;
+            const opacity = isActive
+                ? 0.5 + localProgress * 0.5
+                : localProgress;
+            char.style.transform = `translateY(${yOffset}px)`;
+            char.style.opacity = opacity.toString();
+        },
+        blur: (char, charIndex, localProgress, isActive, totalChars) => {
+            const blur = isActive
+                ? (1 - localProgress) * 10
+                : (1 - localProgress) * 20;
+            const scale = isActive ? 0.8 + localProgress * 0.2 : localProgress;
+            const opacity = isActive ? localProgress : localProgress * 0.8;
+            char.style.transform = `scale(${scale})`;
+            char.style.filter = `blur(${blur}px)`;
+            char.style.opacity = opacity.toString();
+        },
+        scatter: (char, charIndex, localProgress, isActive, totalChars) => {
+            const seed = charIndex * 137.5;
+            const randomX = Math.sin(seed) * 100;
+            const randomY = Math.cos(seed) * 50;
+            const randomRotate = Math.sin(seed * 2) * 45;
+            const invProgress = 1 - localProgress;
+            const x = isActive ? randomX * invProgress : randomX * invProgress;
+            const y = isActive
+                ? randomY * invProgress
+                : randomY * invProgress + 30;
+            const rotate = isActive
+                ? randomRotate * invProgress
+                : randomRotate * invProgress;
+            const opacity = localProgress;
+            char.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+            char.style.opacity = opacity.toString();
+            char.style.filter = "none";
+        },
+        flip: (char, charIndex, localProgress, isActive, totalChars) => {
+            const delay = charIndex * 0.03;
+            const adjustedProgress = Math.max(
+                0,
+                Math.min(1, (localProgress - delay) / (1 - delay)),
+            );
+            const rotateX = isActive
+                ? (1 - adjustedProgress) * -90
+                : (1 - adjustedProgress) * 90;
+            const opacity = adjustedProgress;
+            char.style.transform = `perspective(500px) rotateX(${rotateX}deg)`;
+            char.style.opacity = opacity.toString();
+            char.style.filter = "none";
+        },
+    };
+    function updateCarousel() {
+        const scrollLeft = scrollDriver.scrollLeft;
+        const itemWidth = scrollDriver.clientWidth;
+        // const maxScroll = scrollDriver.scrollWidth - itemWidth;
+
+        // Calculate overall progress (0 to slides.length - 1)
+        const progress = scrollLeft / itemWidth;
+        const activeIndex = Math.round(progress);
+
+        // Update debug
+        debugScrollRef().textContent = Math.round(scrollLeft).toString();
+        debugProgressRef().textContent = progress.toFixed(3);
+        debugActiveRef().textContent = activeIndex.toString();
+
+        // Update each text item
+        document.querySelectorAll(".text-item").forEach((item, i) => {
+            const chars = item.querySelectorAll(".char");
+            const subtitle = item.querySelector("p");
+            if (!(item instanceof HTMLElement) || !subtitle) return;
+
+            // Calculate local progress for this item (-1 to 1, 0 = centered)
+            const localOffset = progress - i;
+
+            // Determine visibility and animation state
+            const isVisible = Math.abs(localOffset) < 1.5;
+            const isActive = Math.abs(localOffset) < 0.5;
+
+            // Convert to 0-1 progress where 1 = fully visible
+            const localProgress = Math.max(0, 1 - Math.abs(localOffset));
+
+            // Only show debug for the active slide
+            if (isActive) {
+                debugLocalRef().textContent = localProgress.toFixed(3);
+            }
+            if (isVisible) {
+                item.style.display = "block";
+
+                // Animate each character
+                chars.forEach((char, charIndex) => {
+                    if (char instanceof HTMLElement) {
+                        animations[currentMode](
+                            char,
+                            charIndex,
+                            localProgress,
+                            isActive,
+                            chars.length,
+                        );
+                    }
+                });
+
+                // Animate subtitle
+                const subtitleOpacity = Math.pow(localProgress, 2);
+                const subtitleY = (1 - localProgress) * 20;
+                subtitle.style.opacity = subtitleOpacity.toString();
+                subtitle.style.transform = `translateY(${subtitleY}px)`;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Update indicators
+        document.querySelectorAll(".indicator-fill").forEach((fill, i) => {
+            const fillAmount = Math.max(
+                0,
+                Math.min(100, (1 - Math.abs(progress - i)) * 100),
+            );
+            if (fill instanceof HTMLElement) {
+                fill.style.width = `${fillAmount}%`;
+            }
+        });
+    }
+
+    // Event listeners
+    scrollDriver.addEventListener("scroll", updateCarousel);
+
+    // Mode switching
+    document.querySelectorAll(".mode-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            document
+                .querySelectorAll(".mode-btn")
+                .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            if (btn instanceof HTMLElement) {
+                currentMode = btn.dataset.mode ?? "";
+            }
+
+            // Reset filter on all chars when switching modes
+            document.querySelectorAll(".char").forEach((char) => {
+                if (char instanceof HTMLElement) {
+                    char.style.filter = "none";
+                }
+            });
+            updateCarousel();
+        });
+    });
+
+    // Debug toggle
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "d") {
+            debug.classList.toggle("visible");
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+        const itemWidth = scrollDriver.clientWidth;
+        if (e.key === "ArrowRight") {
+            scrollDriver.scrollBy({
+                left: itemWidth,
+                behavior: "smooth",
+            });
+        } else if (e.key === "ArrowLeft") {
+            scrollDriver.scrollBy({
+                left: -itemWidth,
+                behavior: "smooth",
+            });
+        }
+    });
+
+    // Initial update
+    updateCarousel();
+</script>
