@@ -1,9 +1,9 @@
 type UpdaterFunction = (
   char: HTMLElement,
   charIndex: number,
-  localProgress: number,
+  slideProgress: number,
   isActive: boolean,
-  totalChars: number,
+  charCount: number,
 ) => void;
 
 export type { UpdaterFunction };

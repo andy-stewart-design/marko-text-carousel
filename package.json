@@ -8,7 +8,8 @@
     "marko": "^6.0.138"
   },
   "devDependencies": {
-    "@marko/run": "^0.9.3"
+    "@marko/run": "^0.9.3",
+    "vite": "^7.3.1"
   },
   "private": true,
   "scripts": {

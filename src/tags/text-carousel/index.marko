@@ -219,47 +219,66 @@ import { slides } from "./data";
     }
 
     // Event listeners
-    scrollDriver.addEventListener("scroll", updateCarousel);
+    scrollDriver.addEventListener("scroll", updateCarousel, {
+        signal: $signal,
+    });
 
     // Mode switching
-    document.querySelectorAll(".mode-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            document
-                .querySelectorAll(".mode-btn")
-                .forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            currentMode = btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(
+        (btn) => {
+            btn.addEventListener("click", () => {
+                document
+                    .querySelectorAll(".mode-btn")
+                    .forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentMode = btn.dataset.mode;
 
-            // Reset filter on all chars when switching modes
-            document.querySelectorAll(".char").forEach((char) => {
-                char.style.filter = "none";
+                // Reset filter on all chars when switching modes
+                document.querySelectorAll(".char").forEach((char) => {
+                    char.style.filter = "none";
+                });
+                updateCarousel();
             });
-            updateCarousel();
-        });
-    });
+        },
+        {
+            signal: $signal,
+        },
+    );
 
     // Debug toggle
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "d") {
-            debug.classList.toggle("visible");
-        }
-    });
+    document.addEventListener(
+        "keydown",
+        (e) => {
+            if (e.key === "d") {
+                debug.classList.toggle("visible");
+            }
+        },
+        {
+            signal: $signal,
+        },
+    );
 
     // Keyboard navigation
-    document.addEventListener("keydown", (e) => {
-        const itemWidth = scrollDriver.clientWidth;
-        if (e.key === "ArrowRight") {
-            scrollDriver.scrollBy({
-                left: itemWidth,
-                behavior: "smooth",
-            });
-        } else if (e.key === "ArrowLeft") {
-            scrollDriver.scrollBy({
-                left: -itemWidth,
-                behavior: "smooth",
-            });
-        }
-    });
+    document.addEventListener(
+        "keydown",
+        (e) => {
+            const itemWidth = scrollDriver.clientWidth;
+            if (e.key === "ArrowRight") {
+                scrollDriver.scrollBy({
+                    left: itemWidth,
+                    behavior: "smooth",
+                });
+            } else if (e.key === "ArrowLeft") {
+                scrollDriver.scrollBy({
+                    left: -itemWidth,
+                    behavior: "smooth",
+                });
+            }
+        },
+        {
+            signal: $signal,
+        },
+    );
 
     // Initial update
     updateCarousel();
