@@ -42,16 +42,15 @@ import { update } from "./update";
             <for|slide, i| of=slides>
                 <div
                     class="text-item"
-                    data-index=i
                     aria-label=slide.title
                     aria-hidden=`${activeIndex !== i}`>
                     <h2>
-                        <for|char, j| of=slide.title>
+                        <for|char| of=slide.title>
                             <if=char === " ">
                                 ${char}
                             </if>
                             <else>
-                                <span class="char" data-index=j>
+                                <span class="char">
                                     ${char}
                                 </span>
                             </else>
@@ -112,7 +111,6 @@ import { update } from "./update";
 </div>
 
 <script>
-    console.log("setting up");
     const autoProgressor = new AutoProgressor(scrollDriverRef());
     autoProgressor.start();
     progressor = autoProgressor;
