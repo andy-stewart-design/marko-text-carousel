@@ -1,0 +1,149 @@
+body {
+  background: #0a0a0f;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+}
+
+.carousel-stack {
+  display: grid;
+  width: 100%;
+  height: 100%;
+
+  & > div {
+    grid-area: 1/-1;
+  }
+}
+
+/* The invisible scroll driver */
+.scroll-driver {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 10;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.scroll-track {
+  display: flex;
+  height: 100%;
+}
+
+.scroll-item {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* The visible text display */
+.text-display {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  height: max-content;
+
+  & > div {
+    grid-area: 1/-1;
+  }
+}
+
+.text-item {
+  display: grid;
+  gap: 2rem;
+  padding-block: 4rem;
+
+  &:not(:nth-of-type(1)) {
+    display: none;
+  }
+
+  :is(h2, p) {
+    text-align: center;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 8vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    opacity: 0.7;
+    line-height: 1.3;
+  }
+}
+
+/* Character spans for per-letter animation */
+.char {
+  display: inline-block;
+  transition:
+    transform 0.1s ease-out,
+    opacity 0.1s ease-out;
+}
+
+/* Progress indicators */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    display: flex;
+    background: none;
+    padding: 0;
+    border: none;
+    border-radius: 100vmax;
+    opacity: 0.6;
+
+    &:is(:hover, :focus) {
+      opacity: 1;
+    }
+  }
+}
+
+.indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 0.5rem;
+  border-radius: 100vmax;
+  z-index: 5;
+}
+
+.indicator {
+  --__progress: var(--progress, 0%);
+
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    to right,
+    #fff var(--__progress),
+    #333 var(--__progress),
+    #333 100%
+  );
+  border-radius: 2px;
+  overflow: hidden;
+
+  &:nth-of-type(1) {
+    --__progress: var(--progress, 100%);
+  }
+}

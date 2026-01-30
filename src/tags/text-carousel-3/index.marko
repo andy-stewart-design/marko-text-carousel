@@ -1,0 +1,119 @@
+import AutoProgressor from "./auto-progress";
+import { slides } from "./data";
+import { wave } from "./animate";
+import { update } from "./update";
+
+<let/progressor=null as unknown as AutoProgressor>
+<let/activeIndex=0>
+<const/handleScroll=() => {
+    const scroll = update(scrollDriverRef(), wave);
+    if (scroll.activeIndex !== activeIndex) activeIndex = scroll.activeIndex;
+}>
+<const/updateSlideIndex=(dir = 1) => {
+    const d = dir < 0 ? -1 : 1;
+    const scrollDriver = scrollDriverRef();
+    const itemWidth = scrollDriver.clientWidth;
+    const progress = scrollDriver.scrollLeft / itemWidth;
+
+    if (progress > 0.05 && progress < 0.95) return;
+
+    progressor.reset();
+    scrollDriver.scrollBy({ left: d * itemWidth, behavior: "smooth" });
+}>
+
+<div class="carousel-container">
+    <div class="carousel-stack">
+        <div/scrollDriverRef
+            class="scroll-driver"
+            onScroll() {
+                handleScroll();
+            }
+            onWheel() {
+                progressor.reset();
+            }
+            tabindex=-1>
+            <div class="scroll-track" id="scrollTrack">
+                <for|_| of=slides>
+                    <div class="scroll-item"/>
+                </for>
+            </div>
+        </div>
+        <div class="text-display" id="textDisplay">
+            <for|slide, i| of=slides>
+                <div
+                    class="text-item"
+                    data-index=i
+                    aria-label=slide.title
+                    aria-hidden=`${activeIndex !== i}`>
+                    <h2>
+                        <for|char, j| of=slide.title>
+                            <if=char === " ">
+                                ${char}
+                            </if>
+                            <else>
+                                <span class="char" data-index=j>
+                                    ${char}
+                                </span>
+                            </else>
+                        </for>
+                    </h2>
+                    <p>${slide.subtitle}</p>
+                </div>
+            </for>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button
+            aria-label="Previous slide"
+            onClick() {
+                updateSlideIndex(-1);
+            }>
+            <svg viewBox="0 0 20 20" width="20" height="20">
+                <path
+                    d="M 13 2 L 5 10 L 13 18"
+                    stroke="currentColor"
+                    stroke-width=2
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"/>
+            </svg>
+        </button>
+        <div
+            class="indicators"
+            id="indicators"
+            onKeyDown(e) {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+                const dir = e.key === "ArrowRight" ? 1 : -1;
+                e.preventDefault();
+                updateSlideIndex(dir);
+            }
+            tabindex=0>
+            <for|_| of=slides>
+                <div class="indicator"/>
+            </for>
+        </div>
+        <button
+            aria-label="Next slide"
+            onClick() {
+                updateSlideIndex(1);
+            }>
+            <svg viewBox="0 0 20 20" width="20" height="20">
+                <path
+                    d="M 7 2 L 15 10 L 7 18"
+                    stroke="currentColor"
+                    stroke-width=2
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    console.log("setting up");
+    const autoProgressor = new AutoProgressor(scrollDriverRef());
+    autoProgressor.start();
+    progressor = autoProgressor;
+</script>
