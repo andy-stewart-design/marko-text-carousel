@@ -1,0 +1,75 @@
+// @ts-expect-error
+import { marqueeImages } from "@/data/marquee-images";
+// @ts-expect-error
+import type { paddingSize } from "../content-section/index.marko";
+import s from "./style.module.css";
+export interface Input extends Marko.HTML.Section {
+    paddingBlock?: (paddingSize | null)[];
+    paddingInline?: boolean;
+}
+static function isHTMLElement(el: Element) {
+    return el instanceof HTMLElement;
+}
+static function getFocusableElements(el: Element) {
+    const focusables = el.querySelectorAll(
+        "a[href]:not([disabled]), button:not([disabled])",
+    );
+    return Array.from(focusables).filter(isHTMLElement);
+}
+<let/display="marquee">
+<let/paused=false>
+
+<content-section class=s.controls paddingBlock=["none", "xs"]>
+    <button/trigger onClick() {
+        if (display === "marquee") {
+            display = "carousel";
+            paused = true;
+            getFocusableElements(marquee()).forEach((el) => {
+                el.tabIndex = 0;
+            });
+        } else {
+            display = "marquee";
+            paused = false;
+        }
+    }>
+        <if=paused>
+            <icon-pause-12/>
+        </if>
+        <else>
+            <icon-play-12/>
+        </else>
+        ${paused ? "Pause" : "Play"}
+    </button>
+</content-section>
+<content-section class=s.marquee style=`--item-count: ${marqueeImages.length};`>
+    <ul/marquee class=s.track data-display=display data-paused=`${paused}`>
+        <for|image, i| of=marqueeImages>
+            <li/itemRef
+                class=s.item
+                style={
+                    "--aspect-ratio": image.aspectRatio,
+                    "--item-position": i,
+                }>
+                <lightbox-image
+                    ...image
+                    index=i
+                    animating=!paused
+                    onFocusOff=() => {
+                        trigger().focus();
+                    }/>
+            </li>
+        </for>
+    </ul>
+    // <icon-button
+    //     class=s.toggle
+    //     onClick() {
+    //         animate = !animate;
+    //     }>
+    //     <if=animate>
+    //         <icon-pause-20/>
+    //     </if>
+    //     <else>
+    //         <icon-play-20/>
+    //     </else>
+    // </icon-button>
+</content-section>

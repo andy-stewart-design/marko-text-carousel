@@ -1,0 +1,100 @@
+.controls {
+  button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-50);
+    background: none;
+    border: none;
+    padding: 0;
+    font-weight: var(--font-weight-600);
+    line-height: 1;
+    color: var(--color-foreground-secondary);
+    transition: color var(--motion-duration-short-3)
+      var(--motion-easing-soft-enter);
+
+    &:is(:hover, :focus-visible) {
+      color: var(--color-foreground-primary);
+    }
+  }
+}
+
+.marquee {
+  --single-slide-speed: 5s;
+  --speed: calc(var(--single-slide-speed) * var(--item-count));
+  --item-width: 27.5vw;
+  --item-gap: 24px;
+  --item-width-plus-gap: calc(var(--item-width) + var(--item-gap));
+  --track-width: calc(var(--item-width-plus-gap) * ((var(--item-count) - 1)));
+
+  overflow: hidden;
+  overscroll-behavior-inline: contain;
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-100) 0;
+
+  &[data-display="marquee"] {
+    display: grid;
+    grid-template-columns: var(--track-width) [track] 0px [resting];
+    width: max-content;
+    align-items: start;
+  }
+
+  &[data-display="carousel"] {
+    display: flex;
+    align-items: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-inline: contain;
+  }
+}
+
+.item {
+  .track[data-display="marquee"] & {
+    grid-area: resting;
+    animation: marquee-move var(--speed) linear infinite
+      var(--direction, forwards);
+    animation-delay: calc(
+      var(--single-slide-speed) * (var(--item-count) - var(--item-position)) *
+        -1
+    );
+
+    width: var(--item-width);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ddd;
+    border-radius: var(--radius-large);
+    font-size: 4rem;
+  }
+
+  .track[data-display="carousel"] & {
+    flex: 0 0 calc(var(--item-width) + var(--item-gap));
+    scroll-snap-align: start;
+    padding-inline-start: var(--item-gap);
+  }
+
+  .track[data-paused="true"] & {
+    animation-play-state: paused;
+  }
+
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    border-radius: var(--radius-large);
+  }
+
+  img {
+    aspect-ratio: var(--aspect-ratio);
+  }
+}
+
+@keyframes marquee-move {
+  to {
+    transform: translateX(calc(var(--track-width) * -1 - 100%));
+  }
+}

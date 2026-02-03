@@ -1,0 +1,80 @@
+import { marqueeImages } from "./data";
+import s from "./style.module.css";
+static function isHTMLElement(el: Element) {
+    return el instanceof HTMLElement;
+}
+static function getFocusableElements(el: Element) {
+    const focusables = el.querySelectorAll(
+        "a[href]:not([disabled]), button:not([disabled])",
+    );
+    return Array.from(focusables).filter(isHTMLElement);
+}
+<let/display="marquee">
+<let/paused=false>
+
+<section>
+    <button/trigger onClick() {
+        if (display === "marquee") {
+            display = "carousel";
+            paused = true;
+            getFocusableElements(marquee()).forEach((el) => {
+                el.tabIndex = 0;
+            });
+        } else {
+            display = "marquee";
+            paused = false;
+        }
+    }>
+        ${paused ? "Pause" : "Play"}
+    </button>
+</section>
+<section/marquee class=s.marquee style=`--item-count: ${marqueeImages.length};`>
+    <ul class=s.track data-display=display data-paused=`${paused}`>
+        <for|image, i| of=marqueeImages>
+            <li/itemRef
+                class=s.item
+                style={
+                    "--aspect-ratio": image.aspectRatio,
+                    "--item-position": i,
+                }>
+                <button
+                    aria-label="link"
+                    onClick() {
+                        console.log(image);
+                    }>
+                    <img ...image>
+                </button>
+            </li>
+            <script>
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (display === "carousel") return;
+                        if (
+                            entry.isIntersecting &&
+                            entry.target instanceof HTMLElement
+                        ) {
+                            getFocusableElements(entry.target).forEach((el) => {
+                                el.tabIndex = 0;
+                            });
+                        } else if (entry.target instanceof HTMLElement) {
+                            getFocusableElements(entry.target).forEach((el) => {
+                                el.tabIndex = -1;
+                                if (document.activeElement === el) {
+                                    trigger().focus();
+                                }
+                            });
+                        }
+                    },
+                    {
+                        rootMargin: "0px -5% 0px -5%",
+                    },
+                );
+                observer.observe(itemRef());
+                $signal.onabort = () => {
+                    observer.unobserve(itemRef());
+                    observer.disconnect();
+                };
+            </script>
+        </for>
+    </ul>
+</section>
