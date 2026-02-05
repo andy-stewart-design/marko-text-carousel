@@ -1,0 +1,200 @@
+static const NUM_BOXES = 4;
+<const/boxes: (() => HTMLDivElement)[]=[]>
+<let/visible=false>
+
+<section class="hero">
+  <h1>Cursor Stack Effect</h1>
+  <p>
+    Hover over the section below and move your cursor around. Watch the boxes
+    follow with velocity-based staggering.
+  </p>
+</section>
+
+<section/ctaSectionRef class="cta-section" id="ctaSection">
+  <div class="cta-content">
+    <h2>Ready to get started?</h2>
+    <p>
+      Move your cursor around to see the interactive stack effect in action.
+    </p>
+    <button class="cta-button">
+      Get Started${" "}
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+<section class="footer">
+  <p>Move faster to spread the boxes apart</p>
+</section>
+
+<div id="cursorBoxes" style=[`--box-count: ${NUM_BOXES}`]>
+  <for|i| from=0 until=NUM_BOXES>
+    <div/boxRef
+      class="cursor-box"
+      data-visible=`${visible}`
+      style=[`--sibling-index: ${i}`]/>
+    <script>
+      boxes.push(boxRef);
+    </script>
+  </for>
+</div>
+
+<script>
+  const ctaSection = ctaSectionRef();
+  const numBoxes = boxes.length;
+
+  // Pre-cache box dimensions (read once, not in animation loop)
+  const { offsetWidth, offsetHeight } = boxes[0]();
+  const BOX_WIDTH = offsetWidth - offsetWidth / 5;
+  const BOX_HEIGHT = offsetHeight - offsetWidth / 5;
+
+  // State
+  let mouseX = 0;
+  let prevX = 0;
+  let mouseY = 0;
+  let targetX = 0;
+  let targetY = 0;
+  let velocityX = 0;
+  let velocityY = 0;
+  let speed = 0;
+  let animationId: ReturnType<typeof requestAnimationFrame> | null = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  // Each box tracks its own position
+  const boxStates = Array.from(
+    {
+      length: numBoxes,
+    },
+    () => ({
+      x: -100,
+      y: -100,
+      rotation: 0,
+      scale: 1,
+      targetScale: 0,
+    }),
+  );
+
+  // Easing - decreases for each box (more lag)
+  const easings = Array.from({
+    length: numBoxes,
+  })
+    .map((_, i) => 0.1 + i * 0.025)
+    .reverse();
+
+  // handleMouseEnter
+  function handleMouseEnter(e: MouseEvent) {
+    mouseX = targetX = e.clientX;
+    prevX = mouseX;
+    mouseY = targetY = e.clientY;
+
+    // Initialize positions and trigger scale animation
+    for (let i = 0; i < numBoxes; i++) {
+      boxStates[i].x = mouseX;
+      boxStates[i].y = mouseY;
+      boxStates[i].rotation = 0;
+    }
+    visible = true;
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (!animationId) animate();
+  }
+
+  // handleMouseLeave
+  function handleMouseLeave() {
+    visible = false;
+    timeoutId = setTimeout(() => {
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = null;
+    }, 250);
+  }
+
+  // handleMouseMove
+  function handleMouseMove(e: MouseEvent) {
+    prevX = targetX;
+    targetX = e.clientX;
+    targetY = e.clientY;
+  }
+
+  // Optimized animation loop
+  function animate() {
+    // Calculate velocity
+    const dx = targetX - mouseX;
+    const dy = targetY - mouseY;
+    velocityX = dx;
+    velocityY = dy;
+    speed += (Math.sqrt(dx * dx + dy * dy) - speed) * 0.2;
+    mouseX = targetX;
+    mouseY = targetY;
+
+    // Velocity multiplier for spread effect
+    const spread = Math.min(speed * 0.6, 20);
+    const angle = Math.atan2(velocityY, velocityX);
+    const cosAngle = Math.cos(angle + Math.PI);
+    const sinAngle = Math.sin(angle + Math.PI);
+
+    // Update each box
+    for (let i = 0; i < numBoxes; i++) {
+      const box = boxes[i]();
+      const state = boxStates[i];
+      const easing = easings[i];
+
+      // Target with velocity-based offset
+      const offset = i * spread;
+      const tx = mouseX + cosAngle * offset;
+      const ty = mouseY + sinAngle * offset;
+
+      // Interpolate position
+      state.x += (tx - state.x) * easing;
+      state.y += (ty - state.y) * easing;
+
+      // Interpolate rotation
+      const dir = prevX < mouseX ? -1 : prevX > mouseX ? 1 : 0;
+      const targetRot = speed * (i + 1) * 0.4 * dir;
+      state.rotation += (targetRot - state.rotation) * 0.15;
+
+      // Update opacity based on scale
+      box.style.opacity = state.scale.toString();
+
+      // Apply transform (GPU accelerated)
+      const x = state.x - BOX_WIDTH - i * 12;
+      const y = state.y - BOX_HEIGHT - i * 12;
+      box.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${state.rotation}deg) scale(${1})`;
+    }
+    animationId = requestAnimationFrame(animate);
+  }
+
+  // Event listeners
+  ctaSection.addEventListener("mouseenter", handleMouseEnter, {
+    signal: $signal,
+  });
+  ctaSection.addEventListener("mouseleave", handleMouseLeave, {
+    signal: $signal,
+  });
+  ctaSection.addEventListener("mousemove", handleMouseMove, {
+    signal: $signal,
+  });
+
+  // Cleanup on visibility change
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (document.hidden && animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    },
+    {
+      signal: $signal,
+    },
+  );
+</script>
