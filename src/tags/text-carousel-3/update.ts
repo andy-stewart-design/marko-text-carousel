@@ -52,14 +52,8 @@ const update = (el: HTMLElement, updater: UpdaterFunction = wave) => {
 
   // Update indicators
   document.querySelectorAll(".indicator").forEach((fill, i) => {
-    const fillAmount = Math.max(
-      0,
-      Math.min(100, (1 - Math.abs(progress - i)) * 100),
-    );
-    if (fill instanceof HTMLElement) {
-      // fill.style.width = `${fillAmount}%`;
-      fill.style.setProperty("--progress", `${fillAmount}%`);
-    }
+    if (!(fill instanceof HTMLElement)) return
+    fill.dataset.active = i === activeIndex ? "true" : "false"
   });
 
   return {

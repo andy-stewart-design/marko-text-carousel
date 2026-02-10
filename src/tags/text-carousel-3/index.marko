@@ -5,10 +5,6 @@ import { update } from "./update";
 
 <let/progressor=null as unknown as AutoProgressor>
 <let/activeIndex=0>
-<const/handleScroll=() => {
-    const scroll = update(scrollDriverRef(), wave);
-    if (scroll.activeIndex !== activeIndex) activeIndex = scroll.activeIndex;
-}>
 <const/updateSlideIndex=(dir = 1) => {
     const d = dir < 0 ? -1 : 1;
     const scrollDriver = scrollDriverRef();
@@ -26,15 +22,20 @@ import { update } from "./update";
         <div/scrollDriverRef
             class="scroll-driver"
             onScroll() {
-                handleScroll();
+                const scroll = update(scrollDriverRef(), wave);
+                if (scroll.activeIndex !== activeIndex) {
+                    activeIndex = scroll.activeIndex;
+                }
             }
             onWheel() {
                 progressor.reset();
             }
             tabindex=-1>
             <div class="scroll-track" id="scrollTrack">
-                <for|_| of=slides>
-                    <div class="scroll-item"/>
+                <for|i| from=0 until=slides.length>
+                    <div class="scroll-item">
+                        ${i}
+                    </div>
                 </for>
             </div>
         </div>
@@ -111,7 +112,24 @@ import { update } from "./update";
 </div>
 
 <script>
-    const autoProgressor = new AutoProgressor(scrollDriverRef());
+    const autoProgressor = new AutoProgressor(() => {
+        const el = scrollDriverRef();
+        const itemWidth = el.clientWidth;
+        const maxScroll = el.scrollWidth - itemWidth;
+
+        // Loop back to start if at end, otherwise advance
+        if (el.scrollLeft >= maxScroll - 10) {
+            el.scrollTo({
+                left: 0,
+                behavior: "auto",
+            });
+        } else {
+            el.scrollBy({
+                left: itemWidth,
+                behavior: "smooth",
+            });
+        }
+    });
     autoProgressor.start();
     progressor = autoProgressor;
 </script>

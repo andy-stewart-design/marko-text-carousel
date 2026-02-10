@@ -1,0 +1,28 @@
+import AutoProgressor from "../../auto-progress";
+export interface Input extends Marko.HTML.Div {
+    slideCount: number;
+    // onScroll?: Pick<Marko.HTML.Div, "onScroll">;
+}
+<let/progressor=null as unknown as AutoProgressor>
+
+<div/scrollDriverRef
+    class="scroll-driver"
+    onScroll(e) {
+        if (input.onScroll) input.onScroll(e, scrollDriverRef());
+    }
+    onWheel() {
+        progressor.reset();
+    }
+    tabindex=-1>
+    <div class="scroll-track" id="scrollTrack">
+        <for|_| from=0 until=input.slideCount>
+            <div class="scroll-item"/>
+        </for>
+    </div>
+</div>
+
+<script>
+    const autoProgressor = new AutoProgressor(scrollDriverRef());
+    autoProgressor.start();
+    progressor = autoProgressor;
+</script>
