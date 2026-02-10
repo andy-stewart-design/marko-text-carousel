@@ -1,0 +1,176 @@
+import s from "./evo.module.css";
+static const slides = [1, 2, 3, 4, 5];
+<let/currentIndex=0>
+<const/refs={ currentIndex: 0, scrolling: false, scrollTimeout: 0 }>
+<const/announceSlide(message: string) {
+    ariaLiveRef().textContent = message;
+}>
+<const/scrollTo(left: number, b: ScrollBehavior = "instant") {
+    carouselRef().scrollTo({ left, behavior: b });
+}>
+<const/scrollBy(dir: 1 | -1 = 1) {
+    const slideWidth = carouselRef().offsetWidth;
+    carouselRef().scrollBy({ left: slideWidth * dir, behavior: "smooth" });
+}>
+<const/handleScrollEnd(resetPosition = true) {
+    refs.scrolling = false;
+
+    const totalSlides = slides.length;
+    const slideWidth = carouselRef().offsetWidth;
+    const scrollPos = carouselRef().scrollLeft;
+    const slideIndex = Math.round(scrollPos / slideWidth);
+    const totalDomSlides = totalSlides + 2;
+
+    let newIndex = refs.currentIndex;
+
+    if (slideIndex === 0) {
+        if (resetPosition) scrollTo(totalSlides * slideWidth);
+        newIndex = totalSlides - 1;
+    } else if (slideIndex === totalDomSlides - 1) {
+        if (resetPosition) scrollTo(slideWidth);
+        newIndex = 0;
+    } else {
+        newIndex = slideIndex - 1;
+    }
+
+    // Commit changes on index change
+    if (newIndex !== refs.currentIndex) {
+        refs.currentIndex = newIndex;
+        currentIndex = newIndex;
+        announceSlide(`Slide ${slides[newIndex]} of ${slides.length}`);
+    }
+}>
+
+<div/ariaLiveRef class=s.live aria-live="polite" aria-atomic="true"/>
+
+<div
+    class=s.container
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="Infinite carousel">
+    <div/carouselRef
+        class=s.carousel
+        id="carousel"
+        aria-label=`Slide ${currentIndex} of ${slides.length}`
+        data-index=currentIndex
+        onScroll() {
+            if (!refs.scrolling) refs.scrolling = true;
+            if ("onscrollend" in window) return;
+            clearTimeout(refs.scrollTimeout);
+            refs.scrollTimeout = setTimeout(handleScrollEnd, 150);
+        }
+        onScrollEnd() {
+            handleScrollEnd();
+        }
+        onKeyDown(e) {
+            if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                if (!refs.scrolling) scrollBy(-1);
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                if (!refs.scrolling) scrollBy(1);
+            }
+        }>
+        <div
+            class=s.slide
+            role="group"
+            aria-roledescription="slide"
+            data-index=slides.length - 1
+            data-clone>
+            <span class=s.number>
+                ${slides.length}
+            </span>
+        </div>
+        <for|i| from=0 until=slides.length>
+            <div
+                class=s.slide
+                role="group"
+                aria-roledescription="slide"
+                data-index=i
+                data-clone=false>
+                <span class=s.number>
+                    ${i + 1}
+                </span>
+            </div>
+        </for>
+        <div
+            class=s.slide
+            role="group"
+            aria-roledescription="slide"
+            data-index=0
+            data-clone>
+            <span class=s.number>
+                1
+            </span>
+        </div>
+    </div>
+    <button/prevBtnRef
+        class=[s.arrow, s.prev]
+        aria-label="Previous slide"
+        onClick() {
+            if (!refs.scrolling) scrollBy(-1);
+        }>
+        ←
+    </button>
+    <button/nextBtnRef
+        class=[s.arrow, s.next]
+        aria-label="Next slide"
+        onClick() {
+            if (!refs.scrolling) scrollBy(1);
+        }>
+        →
+    </button>
+</div>
+
+<div/dotsRef class=s.dots aria-label="Slide navigation">
+    <for|i| from=0 until=slides.length>
+        <button
+            aria-label=`Jump to slide ${i}`
+            class=s.dot
+            data-active=i === currentIndex
+            onClick() {
+                scrollTo((i + 1) * carouselRef().offsetWidth, "smooth");
+            }/>
+    </for>
+</div>
+
+<script>
+    console.log("Setting up global listeners");
+    // Handle resize
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    window.addEventListener(
+        "resize",
+        () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Hack to prevent
+                const currentIndex = parseFloat(
+                    carouselRef().dataset.index ?? "0",
+                );
+                // Maintain position after resize
+                const slideWidth = carouselRef().offsetWidth;
+                carouselRef().style.scrollBehavior = "auto";
+                carouselRef().scrollLeft = (currentIndex + 1) * slideWidth;
+                carouselRef().style.scrollBehavior = "";
+            }, 100);
+        },
+        {
+            signal: $signal,
+        },
+    );
+</script>
+<script>
+    console.log("Setting up carouselRef", "onscrollsnapchanging" in window);
+    if ("onscrollsnapchanging" in window) {
+        carouselRef().addEventListener(
+            "scrollsnapchanging",
+            () => {
+                handleScrollEnd(false);
+            },
+            {
+                signal: $signal,
+            },
+        );
+    }
+    carouselRef().scrollLeft = carouselRef().offsetWidth;
+</script>
